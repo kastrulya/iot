@@ -60,7 +60,6 @@ function buttonclick(e) {
 </html>
 )rawliteral";
 
-
 const uint16_t PixelCount = 150; // this example assumes 4 pixels, making it smaller will cause a failure
 
 #define colorSaturation 128
@@ -110,6 +109,8 @@ void MoveAnimUpdate(const AnimationParam &param) {
 
     // use the curved progress to calculate the pixel to effect
     uint16_t nextPixel;
+    if (moveDir == 0)
+        return;
     if (moveDir > 0) {
         nextPixel = progress * PixelCount;
     } else {
@@ -126,7 +127,7 @@ void MoveAnimUpdate(const AnimationParam &param) {
     }
     strip.SetPixelColor(nextPixel, CylonEyeColor);
 //    if (nextPixel < 140 && nextPixel > 10) {
-        strip.SetPixelColor(nextPixel + 10, CylonEyeColor);
+    strip.SetPixelColor(nextPixel + 10, CylonEyeColor);
 //    }
 
 
@@ -150,40 +151,39 @@ void SetupAnimations() {
     animations.StartAnimation(1, 5000, MoveAnimUpdate);
 }
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length)
-{
+const char LEDON[] = "ledon";
+const char LEDOFF[] = "ledoff";
+
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
     Serial.printf("webSocketEvent(%d, %d, ...)\r\n", num, type);
-    switch(type) {
+    switch (type) {
         case WStype_DISCONNECTED:
             Serial.printf("[%u] Disconnected!\r\n", num);
             break;
-        case WStype_CONNECTED:
-        {
+        case WStype_CONNECTED: {
             IPAddress ip = webSocket.remoteIP(num);
             Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\r\n", num, ip[0], ip[1], ip[2], ip[3], payload);
             webSocket.sendTXT(num, "ledon", strlen("ledon"));
 
             // Send the current LED status
-//            if (LEDStatus) {
-//                webSocket.sendTXT(num, LEDON, strlen(LEDON));
-//            }
-//            else {
-//                webSocket.sendTXT(num, LEDOFF, strlen(LEDOFF));
-//            }
+            if (moveDir != 0) {
+                webSocket.sendTXT(num, LEDON, strlen(LEDON));
+            }
+            else {
+                webSocket.sendTXT(num, LEDOFF, strlen(LEDOFF));
+            }
         }
             break;
         case WStype_TEXT:
             Serial.printf("[%u] get Text: %s\r\n", num, payload);
 
-//            if (strcmp(LEDON, (const char *)payload) == 0) {
-//                writeLED(true);
-//            }
-//            else if (strcmp(LEDOFF, (const char *)payload) == 0) {
-//                writeLED(false);
-//            }
-//            else {
-//                Serial.println("Unknown command");
-//            }
+            if (strcmp(LEDON, (const char *) payload) == 0) {
+                moveDir = 1;
+            } else if (strcmp(LEDOFF, (const char *) payload) == 0) {
+                moveDir = 0;
+            } else {
+                Serial.println("Unknown command");
+            }
             // send data to all connected clients
             webSocket.broadcastTXT(payload, length);
             break;
@@ -200,25 +200,23 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
     }
 }
 
-void handleRoot()
-{
+void handleRoot() {
     server.send(200, "text/html", INDEX_HTML);
 }
 
-void handleNotFound()
-{
+void handleNotFound() {
     String message = "File Not Found\n\n";
     message += "URI: ";
     message += server.uri();
     message += "\nMethod: ";
-    message += (server.method() == HTTP_GET)?"GET":"POST";
+    message += (server.method() == HTTP_GET) ? "GET" : "POST";
     message += "\nArguments: ";
     message += server.args();
     message += "\n";
-    for (uint8_t i=0; i<server.args(); i++){
+    for (uint8_t i = 0; i < server.args(); i++) {
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     }
-    server.send_P(404, "text/plain", message.c_str()    );
+    server.send_P(404, "text/plain", message.c_str());
 }
 
 void setup() {
@@ -254,7 +252,7 @@ void setup() {
     webSocket.begin();
     webSocket.onEvent(webSocketEvent);
 
-//    SetupAnimations();
+    SetupAnimations();
 //    SetRandomSeed();
 }
 
@@ -267,10 +265,13 @@ void setup() {
 ////    strip.Show();
 //}
 
-void loop(void)
-{
+void loop(void) {
+    OTA.handle();
     webSocket.loop();
     server.handleClient();
+
+    animations.UpdateAnimations();
+    strip.Show();
 }
 
 /*********************************
