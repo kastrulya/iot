@@ -49,6 +49,10 @@ function start() {
 function buttonclick(e) {
   websock.send(e.id);
 }
+function sendColor(color) {
+    var c = color.slice(1);
+    websock.send(c);
+}
 </script>
 </head>
 <body onload="javascript:start();">
@@ -56,6 +60,7 @@ function buttonclick(e) {
 <div id="ledstatus"><b>LED</b></div>
 <button id="ledon"  type="button" onclick="buttonclick(this);">On</button>
 <button id="ledoff" type="button" onclick="buttonclick(this);">Off</button>
+<input id="color" type="color" onchange="sendColor(color.value);">
 </body>
 </html>
 )rawliteral";
@@ -66,7 +71,7 @@ const uint16_t PixelCount = 150; // this example assumes 4 pixels, making it sma
 
 // three element pixels, in different order and speeds
 NeoPixelBus<NeoGrbFeature, NeoEsp8266Dma800KbpsMethod> strip(PixelCount);
-const RgbColor CylonEyeColor(RgbColor(0xAA, 0xAA, 0xAA));
+RgbColor CylonEyeColor(RgbColor(0xAA, 0xAA, 0xAA));
 // for esp8266 omit the pin
 //NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(PixelCount);
 
@@ -168,8 +173,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             // Send the current LED status
             if (moveDir != 0) {
                 webSocket.sendTXT(num, LEDON, strlen(LEDON));
-            }
-            else {
+            } else {
                 webSocket.sendTXT(num, LEDOFF, strlen(LEDOFF));
             }
         }
@@ -182,8 +186,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
             } else if (strcmp(LEDOFF, (const char *) payload) == 0) {
                 moveDir = 0;
             } else {
-                Serial.println("Unknown command");
+                const char *hex = (const char *) payload;
+                uint32_t color = (uint32_t)strtol(hex, NULL, 16);
+                //payload[0] | (payload[1] << 8) | (payload[2] << 16) | (payload[3] << 24);
+                CylonEyeColor = HtmlColor(color);
             }
+//            else {
+//                Serial.println("Unknown command");
+//            }
             // send data to all connected clients
             webSocket.broadcastTXT(payload, length);
             break;
