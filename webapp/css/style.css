@@ -5,10 +5,14 @@
 
 .console {
 	border-top: 1px solid black;
-	height: 200px;
+	/*height: 200px;*/
 	width: 100%;
 	position: absolute;
 	bottom: 0;
+}
+
+.logs-panel {
+	height: 200px;
 }
 
 .command {
@@ -24,4 +28,14 @@
 
 .command_text {
 	width: 75%;
+}
+
+.hide {
+	display: none;
+	/*visibility: hidden;*/
+}
+
+.show {
+	display: block;
+	/*visibility: visible;*/
 }

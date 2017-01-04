@@ -25,13 +25,17 @@
 	</div>
 
 	<div class="console">
-		<div class="filters">
-			<span class="filters_item">Temperature</span>
-			<span class="filters_item">Humidity</span>
-			<span class="filters_item">Curtains</span>
+		<div id="logs-panel" class="logs-panel">
+			<div class="filters">
+				<span class="filters_item">Temperature</span>
+				<span class="filters_item">Humidity</span>
+				<span class="filters_item">Curtains</span>
+			</div>
+			<div class="logs"></div>
 		</div>
-		<div class="history"></div>
+		
 		<div class="command">
+			<button id="switcher">Open</button>
 			<select class="command_channel">
 				<option>/kitchen/fridge/listen</option>
 				<option>/room/curtains/listen</option>
@@ -39,6 +43,6 @@
 			<input type="text" class="command_text">
 		</div>
 	</div>
-
+<script src="js/switcher.js"></script>
 </body>
 </html>
