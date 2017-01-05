@@ -2,7 +2,9 @@
 <html>
 <head>
 	<title>Home Control</title>
+	<!-- <link rel="stylesheet" type="text/css" href="http://meyerweb.com/eric/tools/css/reset/reset200802.css"> -->
 	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<meta charset="UTF-8">
 </head>
 <body>
 	<div class="curtains">
@@ -24,6 +26,21 @@
 		</span>
 	</div>
 
+
+	<div class="channel" style="z-index: 3">
+		<div class="channel_name channel_name__blue">&nbsp;</div>
+		<div class="channel_arrow channel_arrow__blue"></div>
+	</div>
+	<div class="channel" style="z-index: 2">
+		<div class="channel_name channel_name__red">room</div>
+		<div class="channel_arrow channel_arrow__red "></div>
+	</div>
+	<div class="channel" style="z-index: 1">
+		<div class="channel_name channel_name__blue">room</div>
+		<div class="channel_arrow channel_arrow__blue"></div>
+	</div>
+	<!-- <div class="arrow"></div> -->
+
 	<div class="console">
 		<div id="logs-panel" class="logs-panel">
 			<div class="filters">
@@ -35,7 +52,7 @@
 		</div>
 		
 		<div class="command">
-			<button id="switcher">Open</button>
+			<button id="switcher" class="switcher">📜</button>
 			<select class="command_channel">
 				<option>/kitchen/fridge/listen</option>
 				<option>/room/curtains/listen</option>
